@@ -10,6 +10,9 @@ import type { ReadOnlyStore } from "../store.types";
 import type { Transaction, Action } from "./transactions.types";
 import type { Modify, Optional } from "../utils.types";
 import type { FinalExecutionOutcome } from "near-api-js/lib/providers";
+import {
+  SignedDelegate
+} from '@near-js/transactions';
 
 interface BaseWalletMetadata {
   /**
@@ -121,6 +124,12 @@ interface SignAndSendTransactionsParams {
   transactions: Array<Optional<Transaction, "signerId">>;
 }
 
+interface SignedDelegateParams {
+  actions: Action[];
+  blockHeightTtl: number;
+  receiverId: string;
+}
+
 interface BaseWalletBehaviour {
   /**
    * Programmatically sign in. Hardware wallets (e.g. Ledger) require `derivationPaths` to validate access key permissions.
@@ -154,7 +163,11 @@ interface BaseWalletBehaviour {
   signAndSendTransactions(
     params: SignAndSendTransactionsParams
   ): Promise<Array<providers.FinalExecutionOutcome>>;
+
+  signDelegateAction?(params: SignedDelegateParams): Promise<Array<SignedDelegate>>;
   signMessage?(params: SignMessageParams): Promise<SignedMessage | void>;
+
+
 }
 
 type BaseWallet<
@@ -225,6 +238,10 @@ interface BrowserWalletSignAndSendTransactionParams
   callbackUrl?: string;
 }
 
+interface BrowserWalletSignedDelegateParams extends SignedDelegateParams {
+  callbackUrl?: string;
+}
+
 interface BrowserWalletSignAndSendTransactionsParams
   extends SignAndSendTransactionsParams {
   /**
@@ -242,6 +259,7 @@ export type BrowserWalletBehaviour = Modify<
     signAndSendTransaction(
       params: BrowserWalletSignAndSendTransactionParams
     ): Promise<FinalExecutionOutcome | void>;
+    signDelegateAction(params: BrowserWalletSignedDelegateParams): Promise<SignedDelegate>;
     signAndSendTransactions(
       params: BrowserWalletSignAndSendTransactionsParams
     ): Promise<void>;

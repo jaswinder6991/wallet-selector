@@ -221,6 +221,34 @@ const MyNearWallet: WalletBehaviourFactory<
       });
     },
 
+    async signDelegateAction({
+      actions,
+      blockHeightTtl,
+      receiverId,
+      callbackUrl,
+    }) {
+      logger.log("signDelegateAction", {
+        actions,
+        blockHeightTtl,
+        receiverId,
+        callbackUrl,
+      });
+
+      const { contract } = store.getState();
+
+      if (!_state.wallet.isSignedIn() || !contract) {
+        throw new Error("Wallet not signed in");
+      }
+
+      const account = _state.wallet.account();
+
+      return account["signedDelegate"]({
+        actions: actions.map((action) => createAction(action)),
+        blockHeightTtl: blockHeightTtl,
+        receiverId: receiverId,
+      });
+    },
+
     async signAndSendTransactions({ transactions, callbackUrl }) {
       logger.log("signAndSendTransactions", { transactions, callbackUrl });
 
